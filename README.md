@@ -6,3 +6,151 @@ Más ampliamente, mediante políticas de salud basadas en información epidemiol
 
 
 *FONIS-SA22I0129-2000*
+
+
+# Red Neuronal para Predicción con PyTorch
+
+Este código implementa una red neuronal feedforward para un problema de regresión con 3 variables de entrada y 1 variable de salida.
+
+## Arquitectura de la Red Neuronal
+
+La red neuronal implementada es un perceptrón multicapa (MLP) con 2 capas:
+
+```python
+class NeuralNetwork(nn.Module):
+    def __init__(self, input_size=3, hidden_size=39, output_size=1):
+        super(NeuralNetwork, self).__init__()
+        self.layer1 = nn.Linear(input_size, hidden_size)
+        self.layer2 = nn.Linear(hidden_size, output_size)
+        self.relu = nn.ReLU()
+       
+    def forward(self, x):
+        x = self.relu(self.layer1(x))
+        x = self.layer2(x)
+        return x
+```
+
+- **Capa de entrada**: Recibe 3 características (input_size=3)
+- **Capa oculta**: Contiene 39 neuronas (hidden_size=39) con activación ReLU
+- **Capa de salida**: Produce 1 valor de salida (output_size=1) sin función de activación (para regresión)
+
+## Proceso de Entrenamiento
+
+El entrenamiento se realiza en la función `train_model()` con los siguientes componentes:
+
+1. **Función de pérdida**: Error Cuadrático Medio (MSE)
+2. **Optimizador**: Adam con tasa de aprendizaje de 0.001
+3. **Número de épocas**: 1000
+4. **Métricas de seguimiento**:
+   - Pérdida en entrenamiento
+   - Pérdida en prueba
+   - Correlación entre predicciones y valores reales
+
+Durante el entrenamiento:
+- Se guarda el modelo con mejor rendimiento en el conjunto de prueba
+- Se imprime el progreso cada 100 épocas
+- Se registran las métricas para visualización posterior
+
+```python
+def train_model(model, X_train, y_train, X_test, y_test, epochs=1000, lr=0.001):
+    # Definir función de pérdida y optimizador
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    
+    # Listas para almacenar métricas
+    train_losses = []
+    test_losses = []
+    correlations = []
+    
+    # Entrenamiento del modelo
+    best_loss = float('inf')
+    best_model = None
+    
+    for epoch in range(epochs):
+        # Modo entrenamiento
+        model.train()
+        optimizer.zero_grad()
+        
+        # Forward pass
+        outputs = model(X_train)
+        loss = criterion(outputs, y_train)
+        
+        # Backward pass y optimización
+        loss.backward()
+        optimizer.step()
+        
+        # Evaluar en conjunto de prueba
+        model.eval()
+        with torch.no_grad():
+            test_outputs = model(X_test)
+            test_loss = criterion(test_outputs, y_test)
+            
+            # Calcular correlación
+            pred_np = test_outputs.numpy().flatten()
+            true_np = y_test.numpy().flatten()
+            correlation = np.corrcoef(pred_np, true_np)[0, 1]
+        
+        # Guardar métricas
+        train_losses.append(loss.item())
+        test_losses.append(test_loss.item())
+        correlations.append(correlation)
+        
+        # Guardar el mejor modelo
+        if test_loss < best_loss:
+            best_loss = test_loss
+            best_model = model.state_dict().copy()
+        
+        # Imprimir progreso cada 100 épocas
+        if (epoch + 1) % 100 == 0:
+            print(f'Época [{epoch+1}/{epochs}], '
+                  f'Loss: {loss.item():.4f}, '
+                  f'Test Loss: {test_loss.item():.4f}, '
+                  f'Correlación: {correlation:.4f}')
+    
+    # Cargar el mejor modelo
+    model.load_state_dict(best_model)
+    
+    return model, train_losses, test_losses, correlations
+```
+
+## Preprocesamiento de Datos
+
+Antes del entrenamiento, los datos se preparan en la función `load_data()`:
+
+1. Lectura del archivo Excel 'datos-entrada.xlsx'
+2. Separación de características (3 primeras columnas) y variable objetivo (4ª columna)
+3. Normalización de las características usando StandardScaler
+4. División en conjuntos de entrenamiento (80%) y prueba (20%)
+5. Conversión a tensores de PyTorch
+
+## Visualización y Evaluación
+
+Después del entrenamiento, se visualizan las métricas con gráficos de:
+- Pérdida de entrenamiento y prueba vs. épocas
+- Correlación vs. épocas
+
+## Uso del Modelo
+
+El modelo entrenado se guarda y puede cargarse para realizar predicciones con nuevos datos:
+
+```python
+# Guardar modelo
+save_model(trained_model)
+
+# Cargar modelo
+loaded_model = load_model()
+
+# Hacer predicciones
+new_data = np.array([[10, 19, 46]])
+predicted_cases = predict_cases(loaded_model, new_data, scaler)
+```
+
+## Flujo de Ejecución
+
+La función `main()` coordina todo el proceso:
+1. Carga de datos
+2. Creación del modelo
+3. Entrenamiento
+4. Guardado del modelo
+5. Visualización de métricas
+6. Carga del modelo y predicción con nuevos datos
