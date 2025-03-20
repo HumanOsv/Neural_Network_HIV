@@ -154,3 +154,48 @@ La función `main()` coordina todo el proceso:
 4. Guardado del modelo
 5. Visualización de métricas
 6. Carga del modelo y predicción con nuevos datos
+
+# Ejecutar código: 
+
+Para iniciar la aplicación, ejecute el siguiente comando en su terminal:
+
+```
+python main.py
+```
+
+Luego se desplegará una interfaz gráfica (GUI) con tres botones principales ubicados en el panel izquierdo:
+
+## Datos VIH
+Este botón permite cargar el documento "Notificaciones_VIH_2010_2019.xlsx" que contiene los datos históricos de casos de VIH. Al hacer clic:
+- Se abrirá un explorador de archivos para seleccionar el documento Excel
+- Una vez cargado, se procesarán los datos automáticamente
+- Se mostrarán dos gráficos interactivos en el panel central: uno de casos totales y otro de casos anuales
+- Puede hacer clic en cualquier gráfico para verlo en tamaño completo con opción de zoom
+
+## Correr Red Neuronal
+Este botón ejecuta el entrenamiento de la red neuronal para predecir casos de VIH. Al hacer clic:
+- Aparecerá un mensaje informando que el proceso puede tardar varios minutos
+- El sistema ejecutará el script "neuronal_network_ret.py" que entrena el modelo
+- Al finalizar, se mostrará automáticamente un gráfico "nn_optim.png" con dos métricas clave:
+  - La pérdida durante el entrenamiento (comparando datos de entrenamiento y prueba)
+  - La correlación entre valores predichos y reales
+- La ventana del gráfico es adaptable y permite hacer zoom con la rueda del ratón
+
+## Predicción
+Este botón abre una ventana para realizar predicciones con el modelo entrenado. Al hacer clic:
+- Se abrirá una ventana de 400x300 píxeles
+- Podrá introducir múltiples filas de datos, cada una con tres valores numéricos
+- Cada fila representa un conjunto de parámetros para predecir un caso
+- Al presionar "Iniciar Predicción", el sistema:
+  - Validará que los datos ingresados sean correctos
+  - Procesará los datos a través del modelo entrenado
+  - Generará un archivo CSV con los resultados
+  - Mostrará una nueva ventana con los datos de entrada y las predicciones correspondientes
+
+Citations:
+[1] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/1216397/af0ab41c-5ea8-4d1c-9734-8d5785d047d9/paste.txt
+[2] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/1216397/73322d36-4cb3-4a4f-a752-5c316c42c8b6/paste-2.txt
+[3] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/1216397/077e2b10-6355-41f7-9a82-ec5b70064b56/paste-3.txt
+
+---
+Respuesta de Perplexity: pplx.ai/share
